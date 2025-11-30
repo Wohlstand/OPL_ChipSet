@@ -5,6 +5,9 @@ with the polymorphism and resampling.
 
 Primarily used with the libADLMIDI and OPL3 Bank Editor projects.
 
+This module supports C++98 and higher. However, the use of YMFM emualtors
+requires the support for C++14 standard by compilers.
+
 # How to use
 - Include the desired emulator's header (or multiple) into your project (for example "nuked_opl3.h")
 - Have the pointer of type `OPLChipBase` that will hold the initialized emulator's instance.
