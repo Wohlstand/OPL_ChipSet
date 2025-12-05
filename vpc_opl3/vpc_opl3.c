@@ -222,9 +222,14 @@ struct vpc_opl
     struct vslot slots[36];
 
     /* Resampler */
-    int32_t m_samples[2];
-    float m_samplecnt;
-    float m_rateratio;
+    int32_t out_samples[2];
+    float out_samplecnt;
+    float out_rateratio;
+
+    /* Out buffer */
+    int16_t accbuff[2][1024];
+    size_t accbuff_size;
+    size_t accbuff_off;
 };
 
 #define rsm_frac 10
@@ -913,16 +918,16 @@ void vpc_opl_free(void *opl3)
 
 static void rate_reset(struct vpc_opl *chip)
 {
-    chip->m_samples[0] = chip->m_samples[1] = 0;
-    chip->m_samplecnt = 0.0f;
+    chip->out_samples[0] = chip->out_samples[1] = 0;
+    chip->out_samplecnt = 0.0f;
 }
 
 void vpc_opl_set_rate(void *opl3, uint32_t rate)
 {
     struct vpc_opl *chip = (struct vpc_opl *)opl3;
-    chip->m_samples[0] = chip->m_samples[1] = 0;
-    chip->m_samplecnt = 0;
-    chip->m_rateratio = rate / 11025.0f;
+    chip->out_samples[0] = chip->out_samples[1] = 0;
+    chip->out_samplecnt = 0;
+    chip->out_rateratio = rate / 11025.0f;
 }
 
 void vpc_opl_reset(void *opl3)
@@ -1093,59 +1098,61 @@ static short limshort(int a)
     return (short)(a);
 }
 
-void vpc_opl_getoutput(void *opl3, int16_t *buffer, uint32_t len)
+static void vpc_opl_fetch(struct vpc_opl *chip, size_t ln)
 {
     int32_t outbuff[1024];
-    int16_t accbuff[2][1024];
-    uint32_t i, j, k;
-    int ln;
+    uint32_t j, k;
 
+    if(ln >= 1024)
+        ln = 1024; /* Can only fetch 1024 bytes at once! */
+
+    memset(chip->accbuff[0], 0, 2 * ln);
+    memset(chip->accbuff[1], 0, 2 * ln);
+
+    for(j = 0; j < 18; j++)
+    {
+        memset(outbuff, 0, 4 * ln);
+        advance_chan(&chip->channels[j], outbuff, ln);
+
+        for(k = 0; k < ln; k++)
+        {
+            if(chip->opl3 == 1)
+            {
+                chip->accbuff[0][k] = limshort(chip->accbuff[0][k] + chip->channels[j].cha * outbuff[k] / 4);
+                chip->accbuff[1][k] = limshort(chip->accbuff[1][k] + chip->channels[j].chb * outbuff[k] / 4);
+            }
+            else
+            {
+                chip->accbuff[0][k] = limshort(chip->accbuff[0][k] + outbuff[k] / 4);
+                chip->accbuff[1][k] = limshort(chip->accbuff[1][k] + outbuff[k] / 4);
+            }
+        }
+    }
+
+    chip->accbuff_off = 0;
+    chip->accbuff_size = ln;
+}
+
+void vpc_opl_getoutput(void *opl3, int16_t *buffer, uint32_t len)
+{
+    uint32_t i;
     struct vpc_opl *chip = (struct vpc_opl *)opl3;
 
-    for(i = 0; i < len; i += 1024)
+    for(i = 0; i < len; ++i)
     {
-        ln = 1024;
+        if(chip->accbuff_size == 0 || chip->accbuff_off >= chip->accbuff_size)
+            vpc_opl_fetch(chip, (size_t)(len / chip->out_rateratio));
 
-        if(len - i < 1024)
-            ln = len - i;
-
-        memset(accbuff[0], 0, 2 * ln);
-        memset(accbuff[1], 0, 2 * ln);
-
-        for(j = 0; j < 18; j++)
+        while(chip->out_samplecnt < 1.0f)
         {
-            memset(outbuff, 0, 4 * ln);
-            advance_chan(&chip->channels[j], outbuff, ln);
-
-            for(k = 0; k < ln; k++)
-            {
-                if(chip->opl3 == 1)
-                {
-                    accbuff[0][k] = limshort(accbuff[0][k] + chip->channels[j].cha * outbuff[k] / 4);
-                    accbuff[1][k] = limshort(accbuff[1][k] + chip->channels[j].chb * outbuff[k] / 4);
-                }
-                else
-                {
-                    accbuff[0][k] = limshort(accbuff[0][k] + outbuff[k] / 4);
-                    accbuff[1][k] = limshort(accbuff[1][k] + outbuff[k] / 4);
-                }
-            }
+            chip->out_samples[0] = chip->accbuff[0][chip->accbuff_off];
+            chip->out_samples[1] = chip->accbuff[1][chip->accbuff_off];
+            chip->out_samplecnt += chip->out_rateratio;
+            ++chip->accbuff_off;
         }
 
-        for(j = 0; j < ln; j++)
-        {
-            while(chip->m_samplecnt < 1.0f)
-            {
-                chip->m_samples[0] = accbuff[0][j];
-                chip->m_samples[1] = accbuff[1][j];
-                chip->m_samplecnt += chip->m_rateratio;
-                if(chip->m_samplecnt < 1.0f)
-                    ++j; // Next!
-            }
-
-            *buffer++ = chip->m_samples[0];
-            *buffer++ = chip->m_samples[1];
-            chip->m_samplecnt -= 1.0f;
-        }
+        *buffer++ = chip->out_samples[0];
+        *buffer++ = chip->out_samples[1];
+        chip->out_samplecnt -= 1.0f;
     }
 }
