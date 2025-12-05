@@ -35,9 +35,11 @@ public:
     void reset() override;
     void writeReg(uint16_t addr, uint8_t data) override;
     void writePan(uint16_t addr, uint8_t data) override;
+
     void nativePreGenerate() override {}
     void nativePostGenerate() override {}
     void nativeGenerateN(int16_t *output, size_t frames) override;
+
     const char *emulatorName() override;
     ChipType chipType() override;
     bool hasFullPanning() override;

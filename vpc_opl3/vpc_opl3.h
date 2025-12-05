@@ -30,6 +30,8 @@ extern "C" {
 void* vpc_opl_init();
 void vpc_opl_free(void *opl3);
 
+void vpc_opl_set_rate(void *opl3, uint32_t rate);
+
 void vpc_opl_reset(void *opl3);
 
 void vpc_opl_writereg(void *opl3, uint16_t regg, uint8_t data);

@@ -18,9 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <string.h>
 #include "vpc_opl3_emu.h"
 #include "vpc_opl3/vpc_opl3.h"
-
 
 VpcOPL3::VpcOPL3() :
     OPLChipBaseBufferedT(),

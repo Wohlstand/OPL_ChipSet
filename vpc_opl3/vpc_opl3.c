@@ -220,7 +220,14 @@ struct vpc_opl
     int32_t buff[1024];
     struct channel channels[18];
     struct vslot slots[36];
+
+    /* Resampler */
+    int32_t m_samples[2];
+    float m_samplecnt;
+    float m_rateratio;
 };
+
+#define rsm_frac 10
 
 
 /*
@@ -904,6 +911,20 @@ void vpc_opl_free(void *opl3)
     free(chip);
 }
 
+static void rate_reset(struct vpc_opl *chip)
+{
+    chip->m_samples[0] = chip->m_samples[1] = 0;
+    chip->m_samplecnt = 0.0f;
+}
+
+void vpc_opl_set_rate(void *opl3, uint32_t rate)
+{
+    struct vpc_opl *chip = (struct vpc_opl *)opl3;
+    chip->m_samples[0] = chip->m_samples[1] = 0;
+    chip->m_samplecnt = 0;
+    chip->m_rateratio = rate / 11025.0f;
+}
+
 void vpc_opl_reset(void *opl3)
 {
     int i;
@@ -930,6 +951,9 @@ void vpc_opl_reset(void *opl3)
         chip->channels[i].cha = 1;
         chip->channels[i].chb = 1;
     }
+
+    vpc_opl_set_rate(chip, 49716);
+    rate_reset(chip);
 }
 
 void vpc_opl_writereg(void *opl3, uint16_t regg, uint8_t data)
@@ -1110,8 +1134,18 @@ void vpc_opl_getoutput(void *opl3, int16_t *buffer, uint32_t len)
 
         for(j = 0; j < ln; j++)
         {
-            *buffer++ = accbuff[0][j];
-            *buffer++ = accbuff[1][j];
+            while(chip->m_samplecnt < 1.0f)
+            {
+                chip->m_samples[0] = accbuff[0][j];
+                chip->m_samples[1] = accbuff[1][j];
+                chip->m_samplecnt += chip->m_rateratio;
+                if(chip->m_samplecnt < 1.0f)
+                    ++j; // Next!
+            }
+
+            *buffer++ = chip->m_samples[0];
+            *buffer++ = chip->m_samples[1];
+            chip->m_samplecnt -= 1.0f;
         }
     }
 }
