@@ -223,8 +223,8 @@ struct vpc_opl
 
     /* Resampler */
     int32_t out_samples[2];
-    float out_samplecnt;
-    float out_rateratio;
+    int32_t out_samplecnt;
+    int32_t out_rateratio;
 
     /* Out buffer */
     int16_t accbuff[2][1024];
@@ -233,6 +233,7 @@ struct vpc_opl
 };
 
 #define rsm_frac 10
+#define rsm_dur 1024
 
 
 /*
@@ -919,7 +920,7 @@ void vpc_opl_free(void *opl3)
 static void rate_reset(struct vpc_opl *chip)
 {
     chip->out_samples[0] = chip->out_samples[1] = 0;
-    chip->out_samplecnt = 0.0f;
+    chip->out_samplecnt = 0;
 }
 
 void vpc_opl_set_rate(void *opl3, uint32_t rate)
@@ -927,7 +928,7 @@ void vpc_opl_set_rate(void *opl3, uint32_t rate)
     struct vpc_opl *chip = (struct vpc_opl *)opl3;
     chip->out_samples[0] = chip->out_samples[1] = 0;
     chip->out_samplecnt = 0;
-    chip->out_rateratio = rate / 11025.0f;
+    chip->out_rateratio = (rate << rsm_frac) / 11025;
 }
 
 void vpc_opl_reset(void *opl3)
@@ -1141,9 +1142,9 @@ void vpc_opl_getoutput(void *opl3, int16_t *buffer, uint32_t len)
     for(i = 0; i < len; ++i)
     {
         if(chip->accbuff_size == 0 || chip->accbuff_off >= chip->accbuff_size)
-            vpc_opl_fetch(chip, (size_t)(len / chip->out_rateratio));
+            vpc_opl_fetch(chip, (size_t)(len * rsm_dur / chip->out_rateratio));
 
-        while(chip->out_samplecnt < 1.0f)
+        while(chip->out_samplecnt < rsm_dur)
         {
             chip->out_samples[0] = chip->accbuff[0][chip->accbuff_off];
             chip->out_samples[1] = chip->accbuff[1][chip->accbuff_off];
@@ -1151,8 +1152,8 @@ void vpc_opl_getoutput(void *opl3, int16_t *buffer, uint32_t len)
             ++chip->accbuff_off;
         }
 
-        *buffer++ = chip->out_samples[0];
-        *buffer++ = chip->out_samples[1];
-        chip->out_samplecnt -= 1.0f;
+        *buffer++ = (chip->out_samples[0] >> 1);
+        *buffer++ = (chip->out_samples[1] >> 1);
+        chip->out_samplecnt -= rsm_dur;
     }
 }
