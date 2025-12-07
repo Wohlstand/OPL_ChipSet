@@ -1014,6 +1014,7 @@ void vpc_opl_writereg(void *opl3, uint16_t regg, uint8_t data)
             }
             break;
         }
+        /* fallthrough */
 
     default:
         hr = regg >> 4;
