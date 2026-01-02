@@ -856,7 +856,7 @@ static int16_t OPL2_OutputCrush(int32_t sample)
     sample >>= shift;
     sample <<= shift;
 
-    return sample;
+    return (int16_t)sample;
 }
 
 void OPL2_Generate(opl2_chip *chip, int16_t * sample)
