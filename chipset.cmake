@@ -35,10 +35,6 @@ set(CHIPS_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/nuked_fast/nukedopl3_fast.c"
     "${CMAKE_CURRENT_LIST_DIR}/nuked_fast/nukedopl3_fast.h"
     "${CMAKE_CURRENT_LIST_DIR}/nuked_fast/wf_rom.h"
-    "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3_emu.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3_emu.h"
-    "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3/vpc_opl3.c"
-    "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3/vpc_opl3.h"
     "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle.h"
     "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nuked_fmopl3.c"
@@ -53,28 +49,37 @@ set(CHIPS_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nopl2.h"
 )
 
+if(OPL_CHIPSET_ENABLE_VPC)
+    list(APPEND CHIPS_SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3_emu.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3_emu.h"
+        "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3/vpc_opl3.c"
+        "${CMAKE_CURRENT_LIST_DIR}/vpc_opl3/vpc_opl3.h"
+    )
+endif()
+
 if(COMPILER_SUPPORTS_CXX14) # YMFM can be built in only condition when C++14 and newer were available
-  set(YMFM_SOURCES
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl2.cpp"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl2.h"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl3.cpp"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl3.h"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm.h"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_opl.cpp"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_opl.h"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_misc.cpp"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_misc.h"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_pcm.cpp"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_pcm.h"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_adpcm.cpp"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_adpcm.h"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_ssg.cpp"
-      "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_ssg.h"
-  )
-  if(DEFINED FLAG_CPP14)
-    set_source_files_properties(${YMFM_SOURCES} COMPILE_FLAGS ${FLAG_CPP14})
-  endif()
-  list(APPEND CHIPS_SOURCES ${YMFM_SOURCES})
+    set(YMFM_SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl2.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl2.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl3.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm_opl3.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_opl.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_opl.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_misc.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_misc.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_pcm.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_pcm.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_adpcm.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_adpcm.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_ssg.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymfm/ymfm_ssg.h"
+    )
+    if(DEFINED FLAG_CPP14)
+        set_source_files_properties(${YMFM_SOURCES} COMPILE_FLAGS ${FLAG_CPP14})
+    endif()
+    list(APPEND CHIPS_SOURCES ${YMFM_SOURCES})
 endif()
 
 if(ENABLE_OPL3_PROXY)
