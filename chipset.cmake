@@ -35,19 +35,29 @@ set(CHIPS_SOURCES
     "${CMAKE_CURRENT_LIST_DIR}/nuked_fast/nukedopl3_fast.c"
     "${CMAKE_CURRENT_LIST_DIR}/nuked_fast/nukedopl3_fast.h"
     "${CMAKE_CURRENT_LIST_DIR}/nuked_fast/wf_rom.h"
-    "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle.h"
-    "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nuked_fmopl3.c"
-    "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nuked_fmopl3.h"
-    "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nopl3.c"
-    "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nopl3.h"
-    "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle.h"
-    "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nuked_fmopl2.c"
-    "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nuked_fmopl2.h"
-    "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nopl2.c"
-    "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nopl2.h"
 )
+
+if(OPL_CHIPSET_ENABLE_LLE_OPL2)
+    list(APPEND CHIPS_SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nuked_fmopl2.c"
+        "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nuked_fmopl2.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nopl2.c"
+        "${CMAKE_CURRENT_LIST_DIR}/ym3812_lle/nopl2.h"
+    )
+endif()
+
+if(OPL_CHIPSET_ENABLE_LLE_OPL3)
+    list(APPEND CHIPS_SOURCES
+        "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle.cpp"
+        "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nuked_fmopl3.c"
+        "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nuked_fmopl3.h"
+        "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nopl3.c"
+        "${CMAKE_CURRENT_LIST_DIR}/ymf262_lle/nopl3.h"
+    )
+endif()
 
 if(OPL_CHIPSET_ENABLE_VPC)
     list(APPEND CHIPS_SOURCES
