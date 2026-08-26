@@ -180,8 +180,8 @@ static const int8_t ad_ch2[0x10] = {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, -1, -1, 0, 1
 };
 
-static const uint8_t ch_slot[18] = {
-    0, 1, 2, 6, 7, 8, 12, 13, 14, 18, 19, 20, 24, 25, 26, 30, 31, 32
+static const uint8_t ch_slot[9] = {
+    0, 1, 2, 6, 7, 8, 12, 13, 14
 };
 
 /*
@@ -827,8 +827,8 @@ static void OPL2_ProcessTimers(opl2_chip *chip)
 
 static int16_t OPL2_OutputCrush(int32_t sample)
 {
-    int shift;
-    int16_t top;
+    uint8_t shift;
+    int32_t top;
 
     if (sample > 32767)
         sample = 32767;
@@ -836,11 +836,14 @@ static int16_t OPL2_OutputCrush(int32_t sample)
         sample = -32768;
 
     top = sample >> 9;
+
     if (top < 0)
         top = (~top) & 63;
     else
         top = top & 63;
+
     shift = 0;
+
     if (top & 32)
         shift = 6;
     else if ((top & 48) == 16)
