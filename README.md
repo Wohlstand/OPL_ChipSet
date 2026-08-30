@@ -27,11 +27,11 @@ requires the support for C++14 standard by compilers.
     - DosBox OPL2 and OPL3 are licensed under GPLv2+.
     - LLE-OPL2 and LLE-OPL3 has the GPLv2+.
     - MAME OPL2 is licensed under GPLv2+.
-    - Nuked OPL2 Lite is licensed under GPLv2+.
   - **LGPLv2.1+**:
     - ESFMu is licensed under LGPLv2.1+.
     - Java OPL3 is licensed under LGPLv2.1+.
     - Nuked OPL3 emulator has LGPLv2.1+.
+    - Nuked OPL2 Lite emulator has LGPLv2.1+.
     - Nuked OPL3 Fast emulator has LGPLv2.1+.
     - Nuked CQM emulator has LGPLv2.1+
     - VPC OPL3 emulator has LGPLv2.1+.
